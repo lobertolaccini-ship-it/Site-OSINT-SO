@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT Web Dashboard</title>
+    <!-- Tailwind CSS (via CDN para Vanilla JS no-build) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        osint: {
+                            bg: '#0a0a0a',
+                            panel: '#111111',
+                            border: '#333333',
+                            neon: '#00ff41',     // Matrix Green
+                            text: '#e0e0e0',
+                            muted: '#6b7280',
+                            danger: '#ef4444'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"Fira Code"', 'Consolas', 'Monaco', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ff41;
+        }
+
+        /* Glitch Effect / Neon Glow on active items */
+        .neon-glow {
+            box-shadow: 0 0 5px #00ff41, 0 0 10px #00ff41;
+        }
+        .text-glow {
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        }
+
+        /* Hide modules by default */
+        .module {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .module.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden selection:bg-osint-neon selection:text-black antialiased">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-osint-panel border-r border-osint-border flex flex-col hidden md:flex transition-all z-20">
+        <div class="p-6 flex items-center gap-3 border-b border-osint-border">
+            <i data-lucide="terminal" class="text-osint-neon"></i>
+            <h1 class="text-xl font-bold tracking-widest text-osint-text text-glow">OSINT<span class="text-osint-neon">.sh</span></h1>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <a href="#dashboard" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                Dashboard
+            </a>
+            <a href="#social" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="social">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                Social Analyzer
+            </a>
+            <a href="#infra" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="infra">
+                <i data-lucide="network" class="w-5 h-5"></i>
+                Infra & IP
+            </a>
+            <a href="#dorks" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="dorks">
+                <i data-lucide="search" class="w-5 h-5"></i>
+                Dorks Generator
+            </a>
+            <a href="#email" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="email">
+                <i data-lucide="mail" class="w-5 h-5"></i>
+                Email Leaks
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-osint-border">
+            <h2 class="text-xs text-osint-muted uppercase tracking-wider mb-3">Histórico Recente</h2>
+            <ul id="history-list" class="space-y-2 text-sm">
+                <!-- Injetado via JS -->
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div class="md:hidden absolute top-0 w-full bg-osint-panel border-b border-osint-border p-4 flex justify-between items-center z-30">
+        <div class="flex items-center gap-2">
+            <i data-lucide="terminal" class="text-osint-neon w-5 h-5"></i>
+            <span class="font-bold text-osint-text">OSINT.sh</span>
+        </div>
+        <button id="mobile-menu-btn" class="text-osint-text hover:text-osint-neon">
+            <i data-lucide="menu"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="hidden fixed inset-0 bg-osint-bg z-20 pt-16 flex flex-col">
+        <nav class="flex-1 p-4 space-y-2">
+            <!-- Same links as sidebar -->
+            <a href="#dashboard" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="dashboard">Dashboard</a>
+            <a href="#social" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="social">Social Analyzer</a>
+            <a href="#infra" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="infra">Infra & IP</a>
+            <a href="#dorks" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="dorks">Dorks Generator</a>
+            <a href="#email" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="email">Email Leaks</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col relative h-screen overflow-y-auto pt-16 md:pt-0 bg-osint-bg text-osint-text">
+        <div class="p-6 md:p-10 max-w-6xl mx-auto w-full">
+            
+            <!-- Dashboard Module -->
+            <section id="dashboard" class="module active">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">System <span class="text-osint-neon text-glow">Dashboard</span></h2>
+                    <p class="text-osint-muted">Central Intelligence Interface. Digite um termo para análise global.</p>
+                </div>
+                
+                <div class="bg-osint-panel border border-osint-neon/30 p-6 rounded-lg mb-8 shadow-[0_0_15px_rgba(0,255,65,0.1)] relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-osint-neon to-transparent opacity-50"></div>
+                    <form id="global-search-form" class="relative">
+                        <i data-lucide="search" class="absolute left-4 top-3.5 text-osint-muted"></i>
+                        <input type="text" id="global-search-input" placeholder="Buscar por IP, @username, domínio ou email..." class="w-full bg-osint-bg border border-osint-border rounded text-osint-text pl-12 pr-4 py-3 focus:outline-none focus:border-osint-neon focus:ring-1 focus:ring-osint-neon transition-all" required autocomplete="off">
+                        <button type="submit" class="absolute right-2 top-2 bg-osint-neon/10 text-osint-neon px-4 py-1.5 rounded hover:bg-osint-neon hover:text-black transition-colors text-sm font-bold">
+                            ANALISAR
+                        </button>
+                    </form>
+                    <div id="global-search-suggestion" class="mt-3 text-sm text-osint-muted hidden">
+                        Sugestão: Ir para <a href="#" id="global-suggestion-link" class="text-osint-neon hover:underline">Módulo</a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="#social" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
+                        <i data-lucide="users" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold mb-1 group-hover:text-osint-neon">Social Analyzer</h3>
+                        <p class="text-xs text-osint-muted">Identifique perfis em múltiplas redes sociais simultaneamente.</p>
+                    </a>
+                    <a href="#infra" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
+                        <i data-lucide="network" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold mb-1 group-hover:text-osint-neon">Infra & IP</h3>
+                        <p class="text-xs text-osint-muted">Consulta de localização IP, ASN e dados de provedor.</p>
+                    </a>
+                    <a href="#dorks" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
+                        <i data-lucide="file-search" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold mb-1 group-hover:text-osint-neon">Dorks Generator</h3>
+                        <p class="text-xs text-osint-muted">Construa queries avançadas para extração de dados no Google.</p>
+                    </a>
+                    <a href="#email" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
+                        <i data-lucide="mail-warning" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold mb-1 group-hover:text-osint-neon">Email Leaks</h3>
+                        <p class="text-xs text-osint-muted">Verifique exposição de emails em vazamentos de dados conhecidos.</p>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Social Analyzer Module -->
+            <section id="social" class="module">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Social <span class="text-osint-neon text-glow">Analyzer</span></h2>
+                    <p class="text-osint-muted">Verifique a existência de um username em dezenas de plataformas.</p>
+                </div>
+
+                <div class="bg-osint-panel border border-osint-border p-6 rounded-lg mb-8">
+                    <form id="social-form" class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 relative">
+                            <span class="absolute left-4 top-3 text-osint-muted">@</span>
+                            <input type="text" id="social-input" placeholder="username" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text pl-10 pr-4 py-3 focus:outline-none focus:border-osint-neon transition-colors" required>
+                        </div>
+                        <button type="submit" class="bg-osint-neon/10 border border-osint-neon text-osint-neon px-8 py-3 rounded hover:bg-osint-neon hover:text-black font-bold transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="radar" class="w-4 h-4"></i> SCAN
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mb-4 flex justify-between items-end">
+                    <h3 class="text-xl font-bold border-b border-osint-border pb-2 inline-block">Resultados <span id="social-target" class="text-osint-neon"></span></h3>
+                    <div id="social-stats" class="text-sm text-osint-muted"></div>
+                </div>
+
+                <div id="social-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Resultados injetados aqui -->
+                    <div class="col-span-full text-center p-10 border border-dashed border-osint-border rounded-lg text-osint-muted">
+                        Aguardando alvo...
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-osint-bg border border-osint-border rounded-lg text-xs text-osint-muted">
+                    <strong class="text-osint-neon">Aviso sobre CORS:</strong> Consultas client-side podem ser bloqueadas pelas políticas de segurança das plataformas. Nesses casos, utilize o botão "Abrir" para verificar manualmente na aba.
+                </div>
+            </section>
+
+            <!-- InfraLookup Module -->
+            <section id="infra" class="module">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Infra <span class="text-osint-neon text-glow">& IP</span></h2>
+                    <p class="text-osint-muted">Resolução de IP, localização geográfica e dados de rede.</p>
+                </div>
+
+                <div class="bg-osint-panel border border-osint-border p-6 rounded-lg mb-8">
+                    <form id="infra-form" class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 relative">
+                            <i data-lucide="globe" class="absolute left-4 top-3.5 text-osint-muted w-5 h-5"></i>
+                            <input type="text" id="infra-input" placeholder="IP alvo (ex: 8.8.8.8) ou deixe em branco para seu IP" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text pl-12 pr-4 py-3 focus:outline-none focus:border-osint-neon transition-colors">
+                        </div>
+                        <button type="submit" class="bg-osint-neon/10 border border-osint-neon text-osint-neon px-8 py-3 rounded hover:bg-osint-neon hover:text-black font-bold transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="search" class="w-4 h-4"></i> RASTREAR
+                        </button>
+                    </form>
+                </div>
+
+                <div id="infra-loader" class="hidden text-center p-10 text-osint-neon animate-pulse">
+                    <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
+                    Rastreando pacotes...
+                </div>
+
+                <div id="infra-results" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-4">
+                            <div class="bg-osint-panel border border-osint-border rounded-lg p-5">
+                                <h3 class="text-osint-muted text-sm uppercase tracking-wider mb-4 border-b border-osint-border pb-2">Informações da Rede</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div class="text-xs text-osint-muted">IP Target</div>
+                                        <div id="infra-res-ip" class="font-mono text-lg text-osint-neon"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-osint-muted">Versão</div>
+                                        <div id="infra-res-version" class="font-mono text-lg"></div>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <div class="text-xs text-osint-muted">Provedor (ISP)</div>
+                                        <div id="infra-res-org" class="font-mono text-lg"></div>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <div class="text-xs text-osint-muted">ASN</div>
+                                        <div id="infra-res-asn" class="font-mono text-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-osint-panel border border-osint-border rounded-lg p-5 h-full">
+                                <h3 class="text-osint-muted text-sm uppercase tracking-wider mb-4 border-b border-osint-border pb-2">Localização</h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <div class="text-xs text-osint-muted">Cidade/Região</div>
+                                        <div id="infra-res-city" class="font-mono"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-osint-muted">País</div>
+                                        <div id="infra-res-country" class="font-mono"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-osint-muted">Coordenadas</div>
+                                        <div class="font-mono text-sm">
+                                            Lat: <span id="infra-res-lat" class="text-osint-neon"></span><br>
+                                            Lon: <span id="infra-res-lon" class="text-osint-neon"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-osint-border">
+                                    <a id="infra-res-map" href="#" target="_blank" class="block w-full text-center bg-osint-bg border border-osint-border hover:border-osint-neon text-osint-text px-4 py-2 rounded text-sm transition-colors">
+                                        Abrir no Google Maps
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Dorks Generator Module -->
+            <section id="dorks" class="module">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Dorks <span class="text-osint-neon text-glow">Generator</span></h2>
+                    <p class="text-osint-muted">Automatize buscas complexas no Google para expor dados indexados indevidamente.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-osint-panel border border-osint-border p-6 rounded-lg">
+                        <form id="dorks-form" class="space-y-4">
+                            <div>
+                                <label class="block text-xs text-osint-muted mb-1">Palavra-chave principal (intext)</label>
+                                <input type="text" id="dork-keyword" placeholder="ex: password, confidential" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text px-3 py-2 focus:outline-none focus:border-osint-neon">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-osint-muted mb-1">Alvo Específico (site)</label>
+                                <input type="text" id="dork-site" placeholder="ex: gov.br, empresa.com" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text px-3 py-2 focus:outline-none focus:border-osint-neon">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-osint-muted mb-1">Tipo de Arquivo (filetype)</label>
+                                    <select id="dork-ext" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text px-3 py-2 focus:outline-none focus:border-osint-neon">
+                                        <option value="">Qualquer</option>
+                                        <option value="pdf">PDF (.pdf)</option>
+                                        <option value="xls OR filetype:xlsx">Excel (.xls, .xlsx)</option>
+                                        <option value="doc OR filetype:docx">Word (.doc, .docx)</option>
+                                        <option value="txt">Texto (.txt)</option>
+                                        <option value="sql">Banco de Dados (.sql)</option>
+                                        <option value="env">Variáveis (.env)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-osint-muted mb-1">No Título (intitle)</label>
+                                    <input type="text" id="dork-title" placeholder="ex: index of" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text px-3 py-2 focus:outline-none focus:border-osint-neon">
+                                </div>
+                            </div>
+                            <button type="button" id="dork-generate-btn" class="w-full bg-osint-neon/10 border border-osint-neon text-osint-neon px-4 py-2 rounded hover:bg-osint-neon hover:text-black font-bold transition-all mt-4">
+                                GERAR QUERY
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-osint-panel border border-osint-border p-6 rounded-lg flex flex-col">
+                        <h3 class="text-sm text-osint-muted uppercase tracking-wider mb-2">Query Resultante</h3>
+                        <div class="bg-black border border-osint-border rounded p-4 flex-1 font-mono text-osint-neon break-all whitespace-pre-wrap relative" id="dork-output">
+                            // Preencha os campos para gerar o dork
+                        </div>
+                        <div class="mt-4 flex gap-2">
+                            <button id="dork-copy-btn" class="flex-1 bg-osint-bg border border-osint-border hover:border-osint-neon text-osint-text px-4 py-2 rounded transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="copy" class="w-4 h-4"></i> Copiar
+                            </button>
+                            <a id="dork-open-btn" href="#" target="_blank" class="flex-1 bg-osint-neon text-black px-4 py-2 rounded hover:bg-osint-neon/80 transition-colors font-bold flex items-center justify-center gap-2 pointer-events-none opacity-50">
+                                <i data-lucide="external-link" class="w-4 h-4"></i> Executar no Google
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Email Leaks Module -->
+            <section id="email" class="module">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Email <span class="text-osint-neon text-glow">Leaks</span></h2>
+                    <p class="text-osint-muted">Verifique se um endereço de email foi exposto em brechas de segurança conhecidas.</p>
+                </div>
+
+                <div class="bg-osint-panel border border-osint-border p-6 rounded-lg mb-8 max-w-2xl">
+                    <form id="email-form" class="flex flex-col gap-4">
+                        <div class="relative">
+                            <i data-lucide="mail" class="absolute left-4 top-3.5 text-osint-muted w-5 h-5"></i>
+                            <input type="email" id="email-input" placeholder="target@email.com" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text pl-12 pr-4 py-3 focus:outline-none focus:border-osint-neon transition-colors" required>
+                        </div>
+                        <p class="text-xs text-osint-muted">Devido a restrições de API em aplicações Frontend (necessidade de chaves pagas no backend), esta ferramenta irá gerar os links diretos para as plataformas de verificação respeitadas.</p>
+                        
+                        <div id="email-actions" class="hidden mt-4 space-y-3 border-t border-osint-border pt-4">
+                            <h3 class="text-sm font-bold text-osint-text mb-2">Opções de Verificação para: <span id="email-target-display" class="text-osint-neon"></span></h3>
+                            
+                            <a id="link-hibp" href="#" target="_blank" class="flex items-center justify-between p-4 bg-osint-bg border border-osint-border rounded hover:border-osint-neon transition-colors group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-[#1f1f1f] flex items-center justify-center">
+                                        <i data-lucide="shield-alert" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm">Have I Been Pwned</div>
+                                        <div class="text-xs text-osint-muted">Maior base de dados de vazamentos</div>
+                                    </div>
+                                </div>
+                                <i data-lucide="external-link" class="w-4 h-4 text-osint-muted group-hover:text-osint-neon"></i>
+                            </a>
+
+                            <a id="link-leakcheck" href="#" target="_blank" class="flex items-center justify-between p-4 bg-osint-bg border border-osint-border rounded hover:border-osint-neon transition-colors group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-[#1f1f1f] flex items-center justify-center">
+                                        <i data-lucide="database" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm">LeakCheck</div>
+                                        <div class="text-xs text-osint-muted">Agregador alternativo de breaches</div>
+                                    </div>
+                                </div>
+                                <i data-lucide="external-link" class="w-4 h-4 text-osint-muted group-hover:text-osint-neon"></i>
+                            </a>
+                        </div>
+                        
+                        <button type="submit" id="email-submit-btn" class="bg-osint-neon/10 border border-osint-neon text-osint-neon px-8 py-3 rounded hover:bg-osint-neon hover:text-black font-bold transition-all flex items-center justify-center gap-2 mt-2">
+                            PREPARAR LINKS
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Load App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
