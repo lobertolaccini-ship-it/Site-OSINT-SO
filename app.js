@@ -277,13 +277,13 @@ function initInfraLookup() {
         loader.classList.remove('hidden');
 
         try {
-            // Se ip vazio, a api retorna do ip atual
-            const apiUrl = ip ? `https://ipapi.co/${ip}/json/` : 'https://ipapi.co/json/';
+            // Utilizando ipwho.is que tem melhor suporte a CORS e rate-limits para free-tier
+            const apiUrl = ip ? `https://ipwho.is/${ip}` : 'https://ipwho.is/';
             const response = await fetch(apiUrl);
             const data = await response.json();
 
-            if (data.error) {
-                alert(`Erro: ${data.reason}`);
+            if (!data.success) {
+                alert(`Erro: ${data.message || 'IP inválido ou não encontrado'}`);
                 loader.classList.add('hidden');
                 return;
             }
@@ -291,12 +291,12 @@ function initInfraLookup() {
             HistoryManager.add(data.ip, 'infra');
 
             document.getElementById('infra-res-ip').textContent = data.ip;
-            document.getElementById('infra-res-version').textContent = data.version;
-            document.getElementById('infra-res-org').textContent = data.org || 'N/A';
-            document.getElementById('infra-res-asn').textContent = data.asn || 'N/A';
+            document.getElementById('infra-res-version').textContent = data.type || 'IPv4';
+            document.getElementById('infra-res-org').textContent = data.connection?.isp || data.connection?.org || 'N/A';
+            document.getElementById('infra-res-asn').textContent = data.connection?.asn ? `AS${data.connection.asn}` : 'N/A';
             
             document.getElementById('infra-res-city').textContent = `${data.city}, ${data.region}`;
-            document.getElementById('infra-res-country').textContent = data.country_name;
+            document.getElementById('infra-res-country').textContent = data.country;
             document.getElementById('infra-res-lat').textContent = data.latitude;
             document.getElementById('infra-res-lon').textContent = data.longitude;
             
@@ -306,7 +306,7 @@ function initInfraLookup() {
             results.classList.remove('hidden');
 
         } catch (error) {
-            alert("Erro ao buscar dados de IP. Verifique a conexão.");
+            alert("Erro ao buscar dados de IP. Verifique a conexão ou se foi bloqueado pelo navegador.");
             loader.classList.add('hidden');
         }
     });
