@@ -1,0 +1,5 @@
+- [x] Update `index.html` UI labels and icons
+- [x] Rename/Update "Social Analyzer" module to "Person Search" in `index.html`
+- [x] Update `app.js` routing and global search logic
+- [x] Implement `initPersonSearch` with Age, Instagram, TikTok, and Email strategies
+- [x] Verify functionality and responsive design
