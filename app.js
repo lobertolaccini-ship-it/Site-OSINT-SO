@@ -1,33 +1,14 @@
-// Configuração de Estratégias para o Person Search
-const PERSON_SEARCH_STRATEGIES = [
-    { 
-        id: 'age', 
-        name: 'Idade & Nascimento', 
-        icon: 'calendar',
-        query: '"{}" "nascimento" OR "idade" OR "born" OR "data de nascimento"',
-        description: 'Busca em registros civis, editais e perfis por datas.'
-    },
-    { 
-        id: 'instagram', 
-        name: 'Instagram', 
-        icon: 'instagram',
-        query: 'site:instagram.com "{}"',
-        description: 'Localiza perfis diretos no Instagram via Google.'
-    },
-    { 
-        id: 'tiktok', 
-        name: 'TikTok', 
-        icon: 'video',
-        query: 'site:tiktok.com "{}"',
-        description: 'Localiza perfis diretos no TikTok via Google.'
-    },
-    { 
-        id: 'email', 
-        name: 'Email Discovery', 
-        icon: 'mail',
-        query: '"{}" "@gmail.com" OR "@hotmail.com" OR "@outlook.com" OR "@yahoo.com"',
-        description: 'Tenta identificar emails públicos associados ao nome.'
-    }
+// Configuração de Plataformas para o Social Analyzer
+const SOCIAL_PLATFORMS = [
+    { name: 'GitHub', url: 'https://github.com/{}', type: 'tech' },
+    { name: 'Twitter', url: 'https://twitter.com/{}', type: 'social' },
+    { name: 'Instagram', url: 'https://instagram.com/{}', type: 'social' },
+    { name: 'Reddit', url: 'https://reddit.com/user/{}', type: 'social' },
+    { name: 'GitLab', url: 'https://gitlab.com/{}', type: 'tech' },
+    { name: 'Medium', url: 'https://medium.com/@{}', type: 'blog' },
+    { name: 'TikTok', url: 'https://tiktok.com/@{}', type: 'social' },
+    { name: 'Twitch', url: 'https://twitch.tv/{}', type: 'stream' },
+    { name: 'Steam', url: 'https://steamcommunity.com/id/{}', type: 'gaming' },
 ];
 
 // Utilitários de Histórico
@@ -82,7 +63,7 @@ const HistoryManager = {
 
     getHashFromType(type) {
         switch(type) {
-            case 'person': return 'person';
+            case 'social': return 'social';
             case 'infra': return 'infra';
             case 'email': return 'email';
             default: return 'dashboard';
@@ -150,9 +131,9 @@ function initGlobalSearch() {
         } else if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(val) || /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(val)) {
             targetModule = 'infra';
             targetName = 'Infra & IP';
-        } else if (val.startsWith('@') || val.includes(' ')) {
-            targetModule = 'person';
-            targetName = 'Person Search';
+        } else if (val.startsWith('@') || !val.includes(' ')) {
+            targetModule = 'social';
+            targetName = 'Social Analyzer';
         }
 
         if (targetModule) {
@@ -180,18 +161,18 @@ function initGlobalSearch() {
             fillAndTriggerSearch(val, 'infra');
         } else {
             const cleanTerm = val.startsWith('@') ? val.substring(1) : val;
-            window.location.hash = 'person';
-            fillAndTriggerSearch(cleanTerm, 'person');
+            window.location.hash = 'social';
+            fillAndTriggerSearch(cleanTerm, 'social');
         }
     });
 }
 
 function fillAndTriggerSearch(term, type) {
     setTimeout(() => {
-        if (type === 'person') {
-            const input = document.getElementById('person-input');
+        if (type === 'social') {
+            const input = document.getElementById('social-input');
             input.value = term;
-            document.getElementById('person-form').dispatchEvent(new Event('submit'));
+            document.getElementById('social-form').dispatchEvent(new Event('submit'));
         } else if (type === 'infra') {
             const input = document.getElementById('infra-input');
             input.value = term;
@@ -204,50 +185,81 @@ function fillAndTriggerSearch(term, type) {
     }, 100); // Wait for hash change animation/render
 }
 
-// Person Search Module
-function initPersonSearch() {
-    const form = document.getElementById('person-form');
-    const input = document.getElementById('person-input');
-    const resultsContainer = document.getElementById('person-results');
-    const targetDisplay = document.getElementById('person-target');
+// Social Analyzer Module
+function initSocialAnalyzer() {
+    const form = document.getElementById('social-form');
+    const input = document.getElementById('social-input');
+    const resultsContainer = document.getElementById('social-results');
+    const targetDisplay = document.getElementById('social-target');
+    const statsDisplay = document.getElementById('social-stats');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const fullName = input.value.trim();
-        if (!fullName) return;
+        let username = input.value.trim();
+        if (username.startsWith('@')) username = username.substring(1);
+        if (!username) return;
 
-        targetDisplay.textContent = fullName;
+        targetDisplay.textContent = `@${username}`;
         resultsContainer.innerHTML = '';
-        HistoryManager.add(fullName, 'person');
+        HistoryManager.add(username, 'social');
 
-        PERSON_SEARCH_STRATEGIES.forEach(strategy => {
-            const searchQuery = strategy.query.replace('{}', fullName);
-            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+        let completed = 0;
+        
+        SOCIAL_PLATFORMS.forEach(platform => {
+            const url = platform.url.replace('{}', username);
             
+            const cardId = `social-card-${platform.name.toLowerCase()}`;
+            
+            // Create loading card
             const card = document.createElement('div');
-            card.className = 'bg-osint-panel border border-osint-border rounded-lg p-5 hover:border-osint-neon transition-all group';
+            card.id = cardId;
+            card.className = 'bg-osint-panel border border-osint-border rounded-lg p-4 flex flex-col justify-between h-28';
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 bg-osint-neon/10 rounded-md">
-                            <i data-lucide="${strategy.icon}" class="w-5 h-5 text-osint-neon"></i>
-                        </div>
-                        <h4 class="font-bold text-osint-text">${strategy.name}</h4>
-                    </div>
-                    <a href="${googleUrl}" target="_blank" class="text-osint-muted hover:text-osint-neon transition-colors">
-                        <i data-lucide="external-link" class="w-4 h-4"></i>
-                    </a>
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-osint-text">${platform.name}</div>
+                    <i data-lucide="loader" class="w-4 h-4 text-osint-muted animate-spin"></i>
                 </div>
-                <p class="text-xs text-osint-muted mb-4">${strategy.description}</p>
-                <a href="${googleUrl}" target="_blank" class="block w-full text-center bg-osint-bg border border-osint-border group-hover:border-osint-neon text-osint-text py-2 rounded text-sm font-bold hover:bg-osint-neon hover:text-black transition-all">
-                    EXECUTAR BUSCA
-                </a>
+                <div class="text-xs text-osint-muted truncate">${url}</div>
             `;
             resultsContainer.appendChild(card);
+            lucide.createIcons();
+
+            // Fetch attempt (will mostly fail due to CORS, but we handle it)
+            fetch(url, { mode: 'no-cors' })
+                .then(response => {
+                    // Opaque response with no-cors doesn't tell us status code (200 or 404).
+                    // So we must fallback to "Verificar Manualmente".
+                    updateSocialCard(cardId, platform.name, url, 'cors_block');
+                })
+                .catch(err => {
+                    updateSocialCard(cardId, platform.name, url, 'cors_block');
+                })
+                .finally(() => {
+                    completed++;
+                    statsDisplay.textContent = `${completed}/${SOCIAL_PLATFORMS.length} checados`;
+                });
         });
-        
-        lucide.createIcons();
     });
+}
+
+function updateSocialCard(cardId, name, url, status) {
+    const card = document.getElementById(cardId);
+    if (!card) return;
+
+    if (status === 'cors_block') {
+        card.classList.add('border-osint-muted');
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div class="font-bold text-osint-text">${name}</div>
+                <i data-lucide="external-link" class="w-4 h-4 text-osint-muted"></i>
+            </div>
+            <div class="flex justify-between items-center mt-auto">
+                <span class="text-xs text-osint-muted bg-[#1f1f1f] px-2 py-1 rounded">Protegido por CORS</span>
+                <a href="${url}" target="_blank" class="text-xs font-bold text-osint-neon hover:underline border border-osint-neon px-2 py-1 rounded">Abrir</a>
+            </div>
+        `;
+    }
+    lucide.createIcons();
 }
 
 // Infra & IP Module
@@ -401,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     HistoryManager.render();
     initRouter();
     initGlobalSearch();
-    initPersonSearch();
+    initSocialAnalyzer();
     initInfraLookup();
     initDorksGenerator();
     initEmailLeaks();

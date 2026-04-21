@@ -53,7 +53,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #00ff41;
         }
-
+        
         /* Glitch Effect / Neon Glow on active items */
         .neon-glow {
             box-shadow: 0 0 5px #00ff41, 0 0 10px #00ff41;
@@ -61,7 +61,7 @@
         .text-glow {
             text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
         }
-
+        
         /* Hide modules by default */
         .module {
             display: none;
@@ -70,7 +70,7 @@
         .module.active {
             display: block;
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
@@ -90,9 +90,9 @@
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                 Dashboard
             </a>
-            <a href="#person" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="person">
-                <i data-lucide="user-search" class="w-5 h-5"></i>
-                Person Search
+            <a href="#social" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="social">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                Social Analyzer
             </a>
             <a href="#infra" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="infra">
                 <i data-lucide="network" class="w-5 h-5"></i>
@@ -107,7 +107,7 @@
                 Email Leaks
             </a>
         </nav>
-
+        
         <div class="p-4 border-t border-osint-border">
             <h2 class="text-xs text-osint-muted uppercase tracking-wider mb-3">Histórico Recente</h2>
             <ul id="history-list" class="space-y-2 text-sm">
@@ -115,7 +115,7 @@
             </ul>
         </div>
     </aside>
-
+    
     <!-- Mobile Header -->
     <div class="md:hidden absolute top-0 w-full bg-osint-panel border-b border-osint-border p-4 flex justify-between items-center z-30">
         <div class="flex items-center gap-2">
@@ -126,19 +126,19 @@
             <i data-lucide="menu"></i>
         </button>
     </div>
-
+    
     <!-- Mobile Menu Overlay -->
     <div id="mobile-menu" class="hidden fixed inset-0 bg-osint-bg z-20 pt-16 flex flex-col">
         <nav class="flex-1 p-4 space-y-2">
             <!-- Same links as sidebar -->
             <a href="#dashboard" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="dashboard">Dashboard</a>
-            <a href="#person" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="person">Person Search</a>
+            <a href="#social" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="social">Social Analyzer</a>
             <a href="#infra" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="infra">Infra & IP</a>
             <a href="#dorks" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="dorks">Dorks Generator</a>
             <a href="#email" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="email">Email Leaks</a>
         </nav>
     </div>
-
+    
     <!-- Main Content -->
     <main class="flex-1 flex flex-col relative h-screen overflow-y-auto pt-16 md:pt-0 bg-osint-bg text-osint-text">
         <div class="p-6 md:p-10 max-w-6xl mx-auto w-full">
@@ -163,12 +163,12 @@
                         Sugestão: Ir para <a href="#" id="global-suggestion-link" class="text-osint-neon hover:underline">Módulo</a>
                     </div>
                 </div>
-
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <a href="#person" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
-                        <i data-lucide="user-search" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="font-bold mb-1 group-hover:text-osint-neon">Person Search</h3>
-                        <p class="text-xs text-osint-muted">Encontre idade, redes sociais e emails através do nome completo.</p>
+                    <a href="#social" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
+                        <i data-lucide="users" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold mb-1 group-hover:text-osint-neon">Social Analyzer</h3>
+                        <p class="text-xs text-osint-muted">Identifique perfis em múltiplas redes sociais simultaneamente.</p>
                     </a>
                     <a href="#infra" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
                         <i data-lucide="network" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
@@ -187,49 +187,50 @@
                     </a>
                 </div>
             </section>
-
-            <!-- Person Search Module -->
-            <section id="person" class="module">
+            
+            <!-- Social Analyzer Module -->
+            <section id="social" class="module">
                 <div class="mb-8">
-                    <h2 class="text-3xl font-bold mb-2">Person <span class="text-osint-neon text-glow">Search</span></h2>
-                    <p class="text-osint-muted">Busca avançada por nome para identificar idade, perfis e contatos.</p>
+                    <h2 class="text-3xl font-bold mb-2">Social <span class="text-osint-neon text-glow">Analyzer</span></h2>
+                    <p class="text-osint-muted">Verifique a existência de um username em dezenas de plataformas.</p>
                 </div>
-
+                
                 <div class="bg-osint-panel border border-osint-border p-6 rounded-lg mb-8">
-                    <form id="person-form" class="flex flex-col md:flex-row gap-4">
+                    <form id="social-form" class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1 relative">
-                            <i data-lucide="user" class="absolute left-4 top-3.5 text-osint-muted w-5 h-5"></i>
-                            <input type="text" id="person-input" placeholder="Nome Completo (ex: João Silva)" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text pl-12 pr-4 py-3 focus:outline-none focus:border-osint-neon transition-colors" required>
+                            <span class="absolute left-4 top-3 text-osint-muted">@</span>
+                            <input type="text" id="social-input" placeholder="username" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text pl-10 pr-4 py-3 focus:outline-none focus:border-osint-neon transition-colors" required>
                         </div>
                         <button type="submit" class="bg-osint-neon/10 border border-osint-neon text-osint-neon px-8 py-3 rounded hover:bg-osint-neon hover:text-black font-bold transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="search" class="w-4 h-4"></i> INVESTIGAR
+                            <i data-lucide="radar" class="w-4 h-4"></i> SCAN
                         </button>
                     </form>
                 </div>
-
+                
                 <div class="mb-4 flex justify-between items-end">
-                    <h3 class="text-xl font-bold border-b border-osint-border pb-2 inline-block">Dossiê: <span id="person-target" class="text-osint-neon"></span></h3>
+                    <h3 class="text-xl font-bold border-b border-osint-border pb-2 inline-block">Resultados <span id="social-target" class="text-osint-neon"></span></h3>
+                    <div id="social-stats" class="text-sm text-osint-muted"></div>
                 </div>
-
-                <div id="person-results" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Resultados injetados aqui: Idade, IG, TikTok, Email -->
+                
+                <div id="social-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Resultados injetados aqui -->
                     <div class="col-span-full text-center p-10 border border-dashed border-osint-border rounded-lg text-osint-muted">
-                        Aguardando alvo para gerar dossiê...
+                        Aguardando alvo...
                     </div>
                 </div>
                 
                 <div class="mt-6 p-4 bg-osint-bg border border-osint-border rounded-lg text-xs text-osint-muted">
-                    <strong class="text-osint-neon">Nota:</strong> Esta ferramenta utiliza Google Dorks e buscas parametrizadas para extrair informações públicas indexadas. Alguns resultados podem exigir verificação manual.
+                    <strong class="text-osint-neon">Aviso sobre CORS:</strong> Consultas client-side podem ser bloqueadas pelas políticas de segurança das plataformas. Nesses casos, utilize o botão "Abrir" para verificar manualmente na aba.
                 </div>
             </section>
-
+            
             <!-- InfraLookup Module -->
             <section id="infra" class="module">
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold mb-2">Infra <span class="text-osint-neon text-glow">& IP</span></h2>
                     <p class="text-osint-muted">Resolução de IP, localização geográfica e dados de rede.</p>
                 </div>
-
+                
                 <div class="bg-osint-panel border border-osint-border p-6 rounded-lg mb-8">
                     <form id="infra-form" class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1 relative">
@@ -241,12 +242,12 @@
                         </button>
                     </form>
                 </div>
-
+                
                 <div id="infra-loader" class="hidden text-center p-10 text-osint-neon animate-pulse">
                     <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
                     Rastreando pacotes...
                 </div>
-
+                
                 <div id="infra-results" class="hidden">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 space-y-4">
@@ -272,7 +273,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="space-y-4">
                             <div class="bg-osint-panel border border-osint-border rounded-lg p-5 h-full">
                                 <h3 class="text-osint-muted text-sm uppercase tracking-wider mb-4 border-b border-osint-border pb-2">Localização</h3>
@@ -302,16 +303,16 @@
                         </div>
                     </div>
                 </div>
-
+                
             </section>
-
+            
             <!-- Dorks Generator Module -->
             <section id="dorks" class="module">
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold mb-2">Dorks <span class="text-osint-neon text-glow">Generator</span></h2>
                     <p class="text-osint-muted">Automatize buscas complexas no Google para expor dados indexados indevidamente.</p>
                 </div>
-
+                
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-osint-panel border border-osint-border p-6 rounded-lg">
                         <form id="dorks-form" class="space-y-4">
@@ -346,7 +347,7 @@
                             </button>
                         </form>
                     </div>
-
+                    
                     <div class="bg-osint-panel border border-osint-border p-6 rounded-lg flex flex-col">
                         <h3 class="text-sm text-osint-muted uppercase tracking-wider mb-2">Query Resultante</h3>
                         <div class="bg-black border border-osint-border rounded p-4 flex-1 font-mono text-osint-neon break-all whitespace-pre-wrap relative" id="dork-output">
@@ -363,14 +364,14 @@
                     </div>
                 </div>
             </section>
-
+            
             <!-- Email Leaks Module -->
             <section id="email" class="module">
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold mb-2">Email <span class="text-osint-neon text-glow">Leaks</span></h2>
                     <p class="text-osint-muted">Verifique se um endereço de email foi exposto em brechas de segurança conhecidas.</p>
                 </div>
-
+                
                 <div class="bg-osint-panel border border-osint-border p-6 rounded-lg mb-8 max-w-2xl">
                     <form id="email-form" class="flex flex-col gap-4">
                         <div class="relative">
@@ -394,7 +395,7 @@
                                 </div>
                                 <i data-lucide="external-link" class="w-4 h-4 text-osint-muted group-hover:text-osint-neon"></i>
                             </a>
-
+                            
                             <a id="link-leakcheck" href="#" target="_blank" class="flex items-center justify-between p-4 bg-osint-bg border border-osint-border rounded hover:border-osint-neon transition-colors group">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded bg-[#1f1f1f] flex items-center justify-center">
@@ -415,10 +416,10 @@
                     </form>
                 </div>
             </section>
-
+            
         </div>
     </main>
-
+    
     <!-- Load App Script -->
     <script src="app.js"></script>
 </body>
