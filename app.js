@@ -33,6 +33,11 @@ const HistoryManager = {
         this.render();
     },
     
+    clear() {
+        localStorage.removeItem(this.key);
+        this.render();
+    },
+    
     render() {
         const list = document.getElementById('history-list');
         const history = this.get();
@@ -356,6 +361,11 @@ document.getElementById('mobile-menu-btn').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     HistoryManager.render();
+    
+    document.getElementById('clear-history').addEventListener('click', () => {
+        HistoryManager.clear();
+    });
+    
     initRouter();
     initGlobalSearch();
     initSocialAnalyzer();

@@ -1,12 +1,5 @@
-- [x] Remove IP module from `index.html`
-    - [x] Remove sidebar link
-    - [x] Remove mobile menu link
-    - [x] Remove dashboard card
-    - [x] Remove section content
-- [x] Remove IP logic from `app.js`
-    - [x] Remove history hash mapping
-    - [x] Remove global search detection
-    - [x] Remove search trigger handler
-    - [x] Delete `initInfraLookup` function
-    - [x] Remove initialization call
+- [x] Add trash button to `index.html`
+- [x] Implement `HistoryManager.clear()` in `app.js`
+- [x] Add event listener to trash button in `app.js`
+- [x] Sync files to workspace
 - [x] Verify functionality
