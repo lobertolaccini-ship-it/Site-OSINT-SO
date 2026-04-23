@@ -1,5 +1,12 @@
-- [x] Update `index.html` UI labels and icons
-- [x] Rename/Update "Social Analyzer" module to "Person Search" in `index.html`
-- [x] Update `app.js` routing and global search logic
-- [x] Implement `initPersonSearch` with Age, Instagram, TikTok, and Email strategies
-- [x] Verify functionality and responsive design
+- [x] Remove IP module from `index.html`
+    - [x] Remove sidebar link
+    - [x] Remove mobile menu link
+    - [x] Remove dashboard card
+    - [x] Remove section content
+- [x] Remove IP logic from `app.js`
+    - [x] Remove history hash mapping
+    - [x] Remove global search detection
+    - [x] Remove search trigger handler
+    - [x] Delete `initInfraLookup` function
+    - [x] Remove initialization call
+- [x] Verify functionality

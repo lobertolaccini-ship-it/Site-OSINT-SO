@@ -64,7 +64,7 @@ const HistoryManager = {
     getHashFromType(type) {
         switch(type) {
             case 'social': return 'social';
-            case 'infra': return 'infra';
+
             case 'email': return 'email';
             default: return 'dashboard';
         }
@@ -128,9 +128,7 @@ function initGlobalSearch() {
         if (val.includes('@') && val.includes('.')) {
             targetModule = 'email';
             targetName = 'Email Leaks';
-        } else if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(val) || /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(val)) {
-            targetModule = 'infra';
-            targetName = 'Infra & IP';
+
         } else if (val.startsWith('@') || !val.includes(' ')) {
             targetModule = 'social';
             targetName = 'Social Analyzer';
@@ -156,9 +154,7 @@ function initGlobalSearch() {
         if (val.includes('@') && val.includes('.')) {
             window.location.hash = 'email';
             fillAndTriggerSearch(val, 'email');
-        } else if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(val) || /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(val)) {
-            window.location.hash = 'infra';
-            fillAndTriggerSearch(val, 'infra');
+
         } else {
             const cleanTerm = val.startsWith('@') ? val.substring(1) : val;
             window.location.hash = 'social';
@@ -173,10 +169,7 @@ function fillAndTriggerSearch(term, type) {
             const input = document.getElementById('social-input');
             input.value = term;
             document.getElementById('social-form').dispatchEvent(new Event('submit'));
-        } else if (type === 'infra') {
-            const input = document.getElementById('infra-input');
-            input.value = term;
-            document.getElementById('infra-form').dispatchEvent(new Event('submit'));
+
         } else if (type === 'email') {
             const input = document.getElementById('email-input');
             input.value = term;
@@ -262,55 +255,7 @@ function updateSocialCard(cardId, name, url, status) {
     lucide.createIcons();
 }
 
-// Infra & IP Module
-function initInfraLookup() {
-    const form = document.getElementById('infra-form');
-    const input = document.getElementById('infra-input');
-    const loader = document.getElementById('infra-loader');
-    const results = document.getElementById('infra-results');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const ip = input.value.trim();
-        
-        results.classList.add('hidden');
-        loader.classList.remove('hidden');
-
-        try {
-            // Utilizando ipwho.is que tem melhor suporte a CORS e rate-limits para free-tier
-            const apiUrl = ip ? `https://ipwho.is/${ip}` : 'https://ipwho.is/';
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-
-            if (!data.success) {
-                alert(`Erro: ${data.message || 'IP inválido ou não encontrado'}`);
-                loader.classList.add('hidden');
-                return;
-            }
-
-            HistoryManager.add(data.ip, 'infra');
-
-            document.getElementById('infra-res-ip').textContent = data.ip;
-            document.getElementById('infra-res-version').textContent = data.type || 'IPv4';
-            document.getElementById('infra-res-org').textContent = data.connection?.isp || data.connection?.org || 'N/A';
-            document.getElementById('infra-res-asn').textContent = data.connection?.asn ? `AS${data.connection.asn}` : 'N/A';
-            
-            document.getElementById('infra-res-city').textContent = `${data.city}, ${data.region}`;
-            document.getElementById('infra-res-country').textContent = data.country;
-            document.getElementById('infra-res-lat').textContent = data.latitude;
-            document.getElementById('infra-res-lon').textContent = data.longitude;
-            
-            document.getElementById('infra-res-map').href = `https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`;
-
-            loader.classList.add('hidden');
-            results.classList.remove('hidden');
-
-        } catch (error) {
-            alert("Erro ao buscar dados de IP. Verifique a conexão ou se foi bloqueado pelo navegador.");
-            loader.classList.add('hidden');
-        }
-    });
-}
 
 // Dorks Generator Module
 function initDorksGenerator() {
@@ -414,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initRouter();
     initGlobalSearch();
     initSocialAnalyzer();
-    initInfraLookup();
+
     initDorksGenerator();
     initEmailLeaks();
 });

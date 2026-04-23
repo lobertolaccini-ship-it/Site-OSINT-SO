@@ -94,10 +94,7 @@
                 <i data-lucide="users" class="w-5 h-5"></i>
                 Social Analyzer
             </a>
-            <a href="#infra" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="infra">
-                <i data-lucide="network" class="w-5 h-5"></i>
-                Infra & IP
-            </a>
+
             <a href="#dorks" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-osint-text hover:bg-osint-neon/10 hover:text-osint-neon transition-colors" data-target="dorks">
                 <i data-lucide="search" class="w-5 h-5"></i>
                 Dorks Generator
@@ -133,7 +130,7 @@
             <!-- Same links as sidebar -->
             <a href="#dashboard" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="dashboard">Dashboard</a>
             <a href="#social" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="social">Social Analyzer</a>
-            <a href="#infra" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="infra">Infra & IP</a>
+
             <a href="#dorks" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="dorks">Dorks Generator</a>
             <a href="#email" class="mobile-nav-link block px-4 py-3 rounded-md text-osint-text border border-osint-border mb-2" data-target="email">Email Leaks</a>
         </nav>
@@ -170,11 +167,7 @@
                         <h3 class="font-bold mb-1 group-hover:text-osint-neon">Social Analyzer</h3>
                         <p class="text-xs text-osint-muted">Identifique perfis em múltiplas redes sociais simultaneamente.</p>
                     </a>
-                    <a href="#infra" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
-                        <i data-lucide="network" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="font-bold mb-1 group-hover:text-osint-neon">Infra & IP</h3>
-                        <p class="text-xs text-osint-muted">Consulta de localização IP, ASN e dados de provedor.</p>
-                    </a>
+
                     <a href="#dorks" class="bg-osint-panel border border-osint-border p-5 rounded-lg hover:border-osint-neon transition-colors group">
                         <i data-lucide="file-search" class="w-8 h-8 text-osint-neon mb-3 group-hover:scale-110 transition-transform"></i>
                         <h3 class="font-bold mb-1 group-hover:text-osint-neon">Dorks Generator</h3>
@@ -224,87 +217,7 @@
                 </div>
             </section>
             
-            <!-- InfraLookup Module -->
-            <section id="infra" class="module">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold mb-2">Infra <span class="text-osint-neon text-glow">& IP</span></h2>
-                    <p class="text-osint-muted">Resolução de IP, localização geográfica e dados de rede.</p>
-                </div>
-                
-                <div class="bg-osint-panel border border-osint-border p-6 rounded-lg mb-8">
-                    <form id="infra-form" class="flex flex-col md:flex-row gap-4">
-                        <div class="flex-1 relative">
-                            <i data-lucide="globe" class="absolute left-4 top-3.5 text-osint-muted w-5 h-5"></i>
-                            <input type="text" id="infra-input" placeholder="IP alvo (ex: 8.8.8.8) ou deixe em branco para seu IP" class="w-full bg-osint-bg border border-osint-border rounded text-osint-text pl-12 pr-4 py-3 focus:outline-none focus:border-osint-neon transition-colors">
-                        </div>
-                        <button type="submit" class="bg-osint-neon/10 border border-osint-neon text-osint-neon px-8 py-3 rounded hover:bg-osint-neon hover:text-black font-bold transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="search" class="w-4 h-4"></i> RASTREAR
-                        </button>
-                    </form>
-                </div>
-                
-                <div id="infra-loader" class="hidden text-center p-10 text-osint-neon animate-pulse">
-                    <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
-                    Rastreando pacotes...
-                </div>
-                
-                <div id="infra-results" class="hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 space-y-4">
-                            <div class="bg-osint-panel border border-osint-border rounded-lg p-5">
-                                <h3 class="text-osint-muted text-sm uppercase tracking-wider mb-4 border-b border-osint-border pb-2">Informações da Rede</h3>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <div class="text-xs text-osint-muted">IP Target</div>
-                                        <div id="infra-res-ip" class="font-mono text-lg text-osint-neon"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs text-osint-muted">Versão</div>
-                                        <div id="infra-res-version" class="font-mono text-lg"></div>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <div class="text-xs text-osint-muted">Provedor (ISP)</div>
-                                        <div id="infra-res-org" class="font-mono text-lg"></div>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <div class="text-xs text-osint-muted">ASN</div>
-                                        <div id="infra-res-asn" class="font-mono text-lg"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div class="bg-osint-panel border border-osint-border rounded-lg p-5 h-full">
-                                <h3 class="text-osint-muted text-sm uppercase tracking-wider mb-4 border-b border-osint-border pb-2">Localização</h3>
-                                <div class="space-y-3">
-                                    <div>
-                                        <div class="text-xs text-osint-muted">Cidade/Região</div>
-                                        <div id="infra-res-city" class="font-mono"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs text-osint-muted">País</div>
-                                        <div id="infra-res-country" class="font-mono"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs text-osint-muted">Coordenadas</div>
-                                        <div class="font-mono text-sm">
-                                            Lat: <span id="infra-res-lat" class="text-osint-neon"></span><br>
-                                            Lon: <span id="infra-res-lon" class="text-osint-neon"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-4 pt-4 border-t border-osint-border">
-                                    <a id="infra-res-map" href="#" target="_blank" class="block w-full text-center bg-osint-bg border border-osint-border hover:border-osint-neon text-osint-text px-4 py-2 rounded text-sm transition-colors">
-                                        Abrir no Google Maps
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </section>
+
             
             <!-- Dorks Generator Module -->
             <section id="dorks" class="module">
