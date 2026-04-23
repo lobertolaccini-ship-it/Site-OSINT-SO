@@ -132,11 +132,11 @@ function initGlobalSearch() {
 
         if (val.includes('@') && val.includes('.')) {
             targetModule = 'email';
-            targetName = 'Email Leaks';
+            targetName = 'Vazamentos de E-mail';
 
         } else if (val.startsWith('@') || !val.includes(' ')) {
             targetModule = 'social';
-            targetName = 'Social Analyzer';
+            targetName = 'Analisador Social';
         }
 
         if (targetModule) {
